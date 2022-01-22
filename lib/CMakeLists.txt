@@ -135,6 +135,11 @@ endif()  #!MSVC
 # The jxl library definition.
 include(jxl.cmake)
 
+# Wasm_Extras, general library for using jpegxl from browser webassembly
+if(JPEGXL_EMSCRIPTEN)
+include(jxl_wasm.cmake)
+endif()
+
 # Other libraries outside the core jxl library.
 include(jxl_extras.cmake)
 include(jxl_threads.cmake)

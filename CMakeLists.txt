@@ -39,7 +39,8 @@ include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-fsanitize=fuzzer-no-link" CXX_FUZZERS_SUPPORTED)
 check_cxx_compiler_flag("-Xclang -mconstructor-aliases" CXX_CONSTRUCTOR_ALIASES_SUPPORTED)
 check_cxx_compiler_flag("-fmacro-prefix-map=OLD=NEW" CXX_MACRO_PREFIX_MAP)
-check_cxx_compiler_flag("-fno-rtti" CXX_NO_RTTI_SUPPORTED)
+check_cxx_compiler_flag("-fno-rtti" CXX_NO_RTTI_SUPPORTED) # for some reason always set...
+
 
 # Enabled PIE binaries by default if supported.
 include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
@@ -228,7 +229,11 @@ if ("${CXX_MACRO_PREFIX_MAP}")
 endif()
 
 if (CXX_NO_RTTI_SUPPORTED)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+  if(JPEGXL_EMSCRIPTEN)
+    set(CXX_NO_RTTI_SUPPORTED FALSE)# if enabled will cause EMSCRIPTEN to not be able to bind, cuasing compile errors for wasm_extras
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+  endif()
 endif()
 
 if (MSVC)

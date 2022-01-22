@@ -15,3 +15,8 @@ third_party/hdrvdp-2.2.2.zip.tmp
 tools/benchmark/metrics/plots
 tools/benchmark/metrics/results.csv
 tools/conformance/__pycache__
+
+
+#Koromaru Korüko: custom excludes, i use for ease of development
+/output/
+build_wasm.sh

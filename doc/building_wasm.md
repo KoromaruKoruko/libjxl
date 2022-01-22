@@ -81,3 +81,38 @@ BUILD_TARGET=wasm32 emconfigure ./ci.sh release
 # or with SIMD WASM:
 BUILD_TARGET=wasm32 ENABLE_WASM_SIMD=1 emconfigure ./ci.sh release
 ```
+
+
+## Using Wasm_Extras (Experimental! May break, not work, or not have expected functionality)
+libjxl when building with emscripten will now export client_wasm_dec and client_wasm_enc (comming soon).
+These libraries will export common use case functions such as decoding, encoding and raw api access.
+
+To incorperate these libraries simply include the wrapper code like you would any other javascript script.
+Modules take time to load, so the library will call a function provided in `libjxl.on_load` if available.
+
+Example of decoding jxl images on the fly:
+```html
+<script>
+function do_initial_setup()
+{
+  console.log(libjxl)
+  // CODE
+}
+
+if (typeof libjxl === 'undefined')
+{
+  libjxl = {
+    loaded: false,
+    on_load: undefined
+  }
+}
+
+
+if(!libjxl.loaded)
+  libjxl.on_load = do_initial_setup
+else
+  do_initial_setup()
+</script>
+<script src="/jxl/scalar/client_wasm_dec.js"> </script>
+```
+

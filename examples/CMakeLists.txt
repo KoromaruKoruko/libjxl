@@ -51,9 +51,7 @@ set_target_properties(StaticJxlThreads PROPERTIES
 )
 
 add_executable(decode_oneshot_static decode_oneshot.cc)
-target_link_libraries(decode_oneshot_static
-  -static StaticJxl StaticJxlThreads)
+target_link_libraries(decode_oneshot_static -static StaticJxl StaticJxlThreads)
 
 add_executable(encode_oneshot_static encode_oneshot.cc)
-target_link_libraries(encode_oneshot_static
-  -static StaticJxl StaticJxlThreads)
+target_link_libraries(encode_oneshot_static -static StaticJxl StaticJxlThreads)

@@ -95,7 +95,7 @@ Example of decoding jxl images on the fly:
 <script>
 function do_initial_setup()
 {
-  console.log(libjxl)
+  console.log(libjxl) // so you can see all the exports
   // CODE
 }
 
@@ -103,12 +103,10 @@ if (typeof libjxl === 'undefined')
 {
   libjxl = {
     loaded: false,
-    on_load: undefined
+    on_load: do_initial_setup
   }
 }
-
-
-if(!libjxl.loaded)
+else if(!libjxl.loaded)
   libjxl.on_load = do_initial_setup
 else
   do_initial_setup()

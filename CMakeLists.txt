@@ -39,7 +39,7 @@ include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-fsanitize=fuzzer-no-link" CXX_FUZZERS_SUPPORTED)
 check_cxx_compiler_flag("-Xclang -mconstructor-aliases" CXX_CONSTRUCTOR_ALIASES_SUPPORTED)
 check_cxx_compiler_flag("-fmacro-prefix-map=OLD=NEW" CXX_MACRO_PREFIX_MAP)
-check_cxx_compiler_flag("-fno-rtti" CXX_NO_RTTI_SUPPORTED) # for some reason always set...
+check_cxx_compiler_flag("-fno-rtti" CXX_NO_RTTI_SUPPORTED)
 
 
 # Enabled PIE binaries by default if supported.

@@ -230,11 +230,6 @@ set(JPEGXL_INTERNAL_SOURCES_DEC
   jxl/xorshift128plus-inl.h
 )
 
-set(JPEGXL_WASM_SOURCES_DEC
-  jxl/wasm_extras/wasm_extras.h
-  jxl/wasm_extras/dec_extras.cc
-)
-
 # List of source files only needed by the encoder or by tools (including
 # decoding tools), but not by the decoder library.
 set(JPEGXL_INTERNAL_SOURCES_ENC
@@ -346,11 +341,6 @@ set(JPEGXL_INTERNAL_SOURCES_ENC
   jxl/optimize.h
   jxl/progressive_split.cc
   jxl/progressive_split.h
-)
-
-set(JPEGXL_WASM_SOURCES_ENC
-  jxl/wasm_extras/wasm_extras.h
-  jxl/wasm_extras/enc_extras.cc
 )
 
 set(JPEGXL_DEC_INTERNAL_LIBS

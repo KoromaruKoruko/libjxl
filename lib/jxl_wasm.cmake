@@ -9,12 +9,6 @@ if (CXX_NO_RTTI_SUPPORTED)
 endif()
 
 
-
-#add_link_options(--bind)
-
-#set(CMAKE_SHARED_LINKER_FLAGS , "${CMAKE_SHARED_LINKER_FLAGS} --bind")
-
-
 add_executable(client_wasm_dec wasm_extras/dec_extras.cc)
 target_compile_options(client_wasm_dec PRIVATE --bind)
 set_target_properties(client_wasm_dec PROPERTIES LINK_FLAGS "--bind -s ALLOW_MEMORY_GROWTH=1")

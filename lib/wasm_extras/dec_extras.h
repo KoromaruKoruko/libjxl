@@ -14,9 +14,42 @@ emscripten::val decode_oneshot_uint8(std::string data);
 emscripten::val decode_oneshot_uint16(std::string data);
 //emscripten::val decode_oneshot_uint32(std::string data);
 
-typedef struct
-{
+struct WasmJxlDecoderStatus{
+private:
+    JxlDecoderStatus status;
+    std::string message;
 
-} WasmJxlDecoder;
+public:
+    WasmJxlDecoderStatus();
+    WasmJxlDecoderStatus(JxlDecoderStatus status);
+    WasmJxlDecoderStatus(std::string message);
+
+
+    std::string getStatusString();
+    const int getStatusInt();
+
+    bool operator ==(WasmJxlDecoderStatus other);
+    bool operator ==(JxlDecoderStatus other);
+};
+
+struct WasmJxlDecoder
+{
+private:
+    JxlDecoderPtr decoder;
+    WasmJxlDecoderStatus last_status;
+
+public:
+    WasmJxlDecoder();
+
+
+    WasmJxlDecoderStatus getStatus();
+    void processInput();
+    void subscribeEvents(emscripten::val events);
+    void setInput(std::string buffer);
+    void closeInput();
+    emscripten::val getBasicInfo();
+    emscripten::val getColorAsICCProfile(JxlPixelFormat format, JxlColorProfileTarget target);
+    emscripten::val getPixelData(JxlPixelFormat format);
+};
 
 #endif

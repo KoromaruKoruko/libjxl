@@ -1,16 +1,37 @@
-// just to get around my stupid vscode
 #define __EMSCRIPTEN__ 1
 
 #ifdef __EMSCRIPTEN__
-#include "jxl/decode.h"
-#include "jxl/decode_cxx.h"
-#include "wasm_extras.h"
+
+#ifndef WASM_EXTRAS_DECODER
+#error WASM_EXTRAS_DECODER NOT SET BUT BUILDING WASM_EXTRAS_DECODER!
+#endif
+
+#include "dec_extras.h"
+#include "wasm_extras_internals.h"
 
 thread_local const emscripten::val Float32Array = emscripten::val::global("Float32Array");
 thread_local const emscripten::val UInt8Array = emscripten::val::global("Uint8ClampedArray");
 thread_local const emscripten::val UInt16Array = emscripten::val::global("Uint16Array");
 thread_local const emscripten::val UInt32Array = emscripten::val::global("Uint32Array");
 thread_local const emscripten::val ImageData = emscripten::val::global("ImageData");
+
+#define DefineEnumString(name) std::make_pair<JxlDecoderStatus, const char*>(JxlDecoderStatus::name, #name)
+const extern std::map<JxlDecoderStatus, const char*> JXLDecoderStatusStrings
+{
+    DefineEnumString(JXL_DEC_ERROR),
+    DefineEnumString(JXL_DEC_EXTENSIONS),
+    DefineEnumString(JXL_DEC_FRAME),
+    DefineEnumString(JXL_DEC_FRAME_PROGRESSION),
+    DefineEnumString(JXL_DEC_FULL_IMAGE),
+    DefineEnumString(JXL_DEC_JPEG_NEED_MORE_OUTPUT),
+    DefineEnumString(JXL_DEC_JPEG_RECONSTRUCTION),
+    DefineEnumString(JXL_DEC_NEED_DC_OUT_BUFFER),
+    DefineEnumString(JXL_DEC_NEED_IMAGE_OUT_BUFFER),
+    DefineEnumString(JXL_DEC_NEED_MORE_INPUT),
+    DefineEnumString(JXL_DEC_NEED_PREVIEW_OUT_BUFFER),
+    DefineEnumString(JXL_DEC_PREVIEW_IMAGE),
+    DefineEnumString(JXL_DEC_SUCCESS)
+};
 
 template<typename TValueType, const JxlDataType TJXL_TYPE>
 inline emscripten::val decode_oneshot(std::string data, const emscripten::val ArrayType) {
@@ -26,7 +47,7 @@ inline emscripten::val decode_oneshot(std::string data, const emscripten::val Ar
   uint32_t xsize = -1;
   uint32_t ysize = -1;
 
-  if (JXL_DEC_SUCCESS != JxlDecoderSubscribeEvents(dec.get(), JXL_DEC_BASIC_INFO /*| JXL_DEC_COLOR_ENCODING*/ | JXL_DEC_FULL_IMAGE)) {
+  if (JXL_DEC_SUCCESS != JxlDecoderSubscribeEvents(dec.get(), JXL_DEC_BASIC_INFO | JXL_DEC_COLOR_ENCODING | JXL_DEC_FULL_IMAGE)) {
     ret.set("error", 1);
     ret.set("message", "did not recive JXL_DEC_SUCCESS from JxlDecoderSubscribeEvents");
     return ret;
@@ -122,26 +143,46 @@ inline emscripten::val decode_oneshot(std::string data, const emscripten::val Ar
 }
 
 
+
+
 //emscripten::val decode_oneshot_boolean(std::string data) { return decode_oneshot<bool, JXL_TYPE_BOOLEAN>(data, BooleanArray); }
 //emscripten::val decode_oneshot_float16(std::string data) { return decode_oneshot<float16_t, JXL_TYPE_FLOAT16>(data, Float16Array); }
 emscripten::val decode_oneshot_float32(std::string data) { return decode_oneshot<float, JXL_TYPE_FLOAT>(data, Float32Array); }
 emscripten::val decode_oneshot_uint8(std::string data) { return decode_oneshot<uint8_t, JXL_TYPE_UINT8>(data, UInt8Array); }
 emscripten::val decode_oneshot_uint16(std::string data) { return decode_oneshot<uint16_t, JXL_TYPE_UINT16>(data, UInt16Array); }
-emscripten::val decode_oneshot_uint32(std::string data) { return decode_oneshot<uint32_t, JXL_TYPE_UINT32>(data, UInt32Array); }
+//emscripten::val decode_oneshot_uint32(std::string data) { return decode_oneshot<uint32_t, JXL_TYPE_UINT32>(data, UInt32Array); }
 
-EMSCRIPTEN_BINDINGS(my_module) {
+// TODO: Implement    emscripten::val decode_to_png_{type}(std::string data)
 
+void wasm_decoder_post_load()
+{
+  emscripten_run_script("console.log('wasm_decoder_post_load')");
+  // move exports to Module.dec
+  emscripten_run_script("Module.export.dec = {"
+    //"decode_oneshot_boolean: Module.decode_oneshot_boolean,"
+    //"decode_oneshot_float16: Module.decode_oneshot_float16,"
+    "decode_oneshot_float32: Module.decode_oneshot_float32,"
+    "decode_oneshot_uint8: Module.decode_oneshot_uint8,"
+    "decode_oneshot_uint16: Module.decode_oneshot_uint16,"
+    //"decode_oneshot_uint32: Module.decode_oneshot_uint32,"
+    "decode_oneshot: Module.decode_oneshot"
+    "};"
+    "Object.freeze(Module.export.dec);"
+  );
+}
+
+EMSCRIPTEN_BINDINGS(dec_extras) {
   // default decode should be uint8, most images will decode perfectly well using this
+  emscripten_run_script("console.log('dec_extras')");
+
+
   emscripten::function("decode_oneshot", &decode_oneshot_uint8);
   //emscripten::function("decode_oneshot_boolean", &decode_oneshot_boolean);
   //emscripten::function("decode_oneshot_float16", &decode_oneshot_float16);
   emscripten::function("decode_oneshot_float32", &decode_oneshot_float32);
   emscripten::function("decode_oneshot_uint8", &decode_oneshot_uint8);
   emscripten::function("decode_oneshot_uint16", &decode_oneshot_uint16);
-  emscripten::function("decode_oneshot_uint32", &decode_oneshot_uint32);
-
-
-  emscripten_run_script("let v=async function(){if(typeof libjxl!=='undefined'){if(typeof libjxl.on_load==='function'){let x=libjxl.on_load;libjxl=Module;libjxl.loaded=true;x();}else{libjxl=Module;libjxl.loaded=true;}}else{libjxl=Module;libjxl.loaded=true;}};v()");
+  //emscripten::function("decode_oneshot_uint32", &decode_oneshot_uint32);
 }
 
 #endif

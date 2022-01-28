@@ -18,5 +18,7 @@ tools/conformance/__pycache__
 
 
 #Koromaru Korüko: custom excludes, i use for ease of development
-/output/
+.vs
+.vscode/
+output/
 build_wasm.sh

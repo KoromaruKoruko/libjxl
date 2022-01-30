@@ -1,5 +1,3 @@
-#define __EMSCRIPTEN__ 1
-
 #if __EMSCRIPTEN__
 
 #ifndef WASM_EXTRAS
@@ -55,6 +53,21 @@ const std::map<JxlOrientation, const char*> JxlOrientationStrings
     DefineEnumString(JXL_ORIENT_ROTATE_90_CCW),
     DefineEnumString(JXL_ORIENT_ROTATE_90_CW),
     DefineEnumString(JXL_ORIENT_TRANSPOSE)
+};
+const std::map<JxlDataType, const char*> JxlDataTypeStrings
+{
+    DefineEnumString(JXL_TYPE_FLOAT),
+    DefineEnumString(JXL_TYPE_BOOLEAN),
+    DefineEnumString(JXL_TYPE_UINT8),
+    DefineEnumString(JXL_TYPE_UINT16),
+    DefineEnumString(JXL_TYPE_UINT32),
+    DefineEnumString(JXL_TYPE_FLOAT16)
+};
+const std::map<JxlEndianness, const char*> JxlEndiannessStrings
+{
+    DefineEnumString(JXL_NATIVE_ENDIAN),
+    DefineEnumString(JXL_LITTLE_ENDIAN),
+    DefineEnumString(JXL_BIG_ENDIAN)
 };
 #undef DefineEnumString
 
@@ -210,10 +223,54 @@ void post_load()
     );
 }
 
+#pragma region WasmBuilder
+#define Struct(type, code) \
+    struct type \
+    {   \
+        code \
+    };
+#define Member(valuetype, member) \
+    valuetype member; \
+    valuetype get##member() const {return member;} \
+    void set##member(valuetype value) {member=value;}
+#define Public() public:
+
+Struct(WasmJxlPreviewHeader,
+    Public()
+    Member(uint32_t, xsize)
+    Member(uint32_t, ysize)
+)
+
+
+#undef Struct
+#undef Member
+#undef Public
+
+#pragma endregion
+
 // should handle loading the module, actual functions shall be exposed via {enc/dec}_extras.cc
 EMSCRIPTEN_BINDINGS(wasm_extras) {
     emscripten_run_script("console.log('wasm_extras')");
     emscripten::function("onRuntimeInitialized", post_load);
+
+
+    #define Struct(type, code) \
+        { \
+            using def_type = type; \
+            auto def = emscripten::class_<type>(#type); \
+            code \
+        }
+    #define __Member2(valuetype, member, getter, setter) def.property(#member, &getter, &setter);
+    #define Member(valuetype, member) __Member2(valuetype, member, def_type::get##member, def_type::set##member)
+    #define Public()
+
+    Struct(WasmJxlPreviewHeader,
+        Public()
+        Member(uint32_t, xsize)
+        Member(uint32_t, ysize)
+    )
+
+
 
 	#define DefineEnum(enum, name) enum##_enum.value(#name, enum::name)
     auto JxlExtraChannelType_enum = emscripten::enum_<JxlExtraChannelType>("JxlExtraChannelType");
@@ -241,6 +298,31 @@ EMSCRIPTEN_BINDINGS(wasm_extras) {
     DefineEnum(JxlBlendMode, JXL_BLEND_MUL);
     DefineEnum(JxlBlendMode, JXL_BLEND_MULADD);
     DefineEnum(JxlBlendMode, JXL_BLEND_REPLACE);
+
+    auto JxlOrientation_enum = emscripten::enum_<JxlOrientation>("JxlOrientation");
+    DefineEnum(JxlOrientation, JXL_ORIENT_ANTI_TRANSPOSE);
+    DefineEnum(JxlOrientation, JXL_ORIENT_FLIP_HORIZONTAL);
+    DefineEnum(JxlOrientation, JXL_ORIENT_FLIP_VERTICAL);
+    DefineEnum(JxlOrientation, JXL_ORIENT_IDENTITY);
+    DefineEnum(JxlOrientation, JXL_ORIENT_ROTATE_180);
+    DefineEnum(JxlOrientation, JXL_ORIENT_ROTATE_90_CCW);
+    DefineEnum(JxlOrientation, JXL_ORIENT_ROTATE_90_CW);
+    DefineEnum(JxlOrientation, JXL_ORIENT_TRANSPOSE);
+
+    auto JxlDataType_enum = emscripten::enum_<JxlDataType>("JxlDataType");
+    DefineEnum(JxlDataType, JXL_TYPE_FLOAT);
+    DefineEnum(JxlDataType, JXL_TYPE_BOOLEAN);
+    DefineEnum(JxlDataType, JXL_TYPE_UINT8);
+    DefineEnum(JxlDataType, JXL_TYPE_UINT16);
+    DefineEnum(JxlDataType, JXL_TYPE_UINT32);
+    DefineEnum(JxlDataType, JXL_TYPE_FLOAT16);
+
+    auto JxlEndianness_enum = emscripten::enum_<JxlEndianness>("JxlEndianness");
+    DefineEnum(JxlEndianness, JXL_NATIVE_ENDIAN);
+    DefineEnum(JxlEndianness, JXL_LITTLE_ENDIAN);
+    DefineEnum(JxlEndianness, JXL_BIG_ENDIAN);
+
+
 
     #undef DefineEnum
 }

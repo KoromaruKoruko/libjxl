@@ -1,5 +1,3 @@
-#define __EMSCRIPTEN__ 1
-
 #ifdef __EMSCRIPTEN__
 
 #ifndef WASM_EXTRAS_ENCODER

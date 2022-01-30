@@ -18,6 +18,8 @@ extern thread_local const emscripten::val JsImageData;
 extern const std::map<JxlExtraChannelType, const char*> JxlExtraChannelTypeStrings;
 extern const std::map<JxlBlendMode, const char*> JxlBlendModeStrings;
 extern const std::map<JxlOrientation, const char*> JxlOrientationStrings;
+extern const std::map<JxlDataType, const char*> JxlDataTypeStrings;
+extern const std::map<JxlEndianness, const char*> JxlEndiannessStrings;
 
 emscripten::val JxlOrientationToJs(JxlOrientation value);
 emscripten::val JxlPreviewHeaderToJs(JxlPreviewHeader value);

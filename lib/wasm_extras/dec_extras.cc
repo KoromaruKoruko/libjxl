@@ -1,5 +1,3 @@
-#define __EMSCRIPTEN__ 1
-
 #ifdef __EMSCRIPTEN__
 
 #ifndef WASM_EXTRAS_DECODER
@@ -275,15 +273,15 @@ emscripten::val WasmJxlDecoder::getPixelData(JxlPixelFormat format)
 		this->last_status = JxlDecoderSetImageOutBuffer(this->decoder.get(), &format, data, size);
 		switch (format.data_type)
 		{
-			//case JXL_TYPE_BOOLEAN: return JsBooleanArray.new_(emscripten::typed_memory_view(size / sizeof(bool), data));
-			//case JXL_TYPE_FLOAT16: return JsFloat16Array.new_(emscripten::typed_memory_view(size / sizeof(float16_t), data));
-			case JXL_TYPE_FLOAT: return JsFloat32Array.new_(emscripten::typed_memory_view(size / sizeof(float), data));
+			//case JXL_TYPE_BOOLEAN: return JsBooleanArray.new_(emscripten::typed_memory_view(size / sizeof(bool), (bool*)data));
+			//case JXL_TYPE_FLOAT16: return JsFloat16Array.new_(emscripten::typed_memory_view(size / sizeof(float16_t), (float16_t*)data));
+			case JXL_TYPE_FLOAT: return JsFloat32Array.new_(emscripten::typed_memory_view(size / sizeof(float), (float*)data));
 			case JXL_TYPE_UINT8: goto return_uint8;
-			case JXL_TYPE_UINT16: return JsUInt16Array.new_(emscripten::typed_memory_view(size / sizeof(uint16_t), data));
-			//case JXL_TYPE_UINT32: return JsUInt32Array.new_(emscripten::typed_memory_view(size / sizeof(uint32_t), data));
+			case JXL_TYPE_UINT16: return JsUInt16Array.new_(emscripten::typed_memory_view(size / sizeof(uint16_t), (uint16_t*)data));
+			//case JXL_TYPE_UINT32: return JsUInt32Array.new_(emscripten::typed_memory_view(size / sizeof(uint32_t), (uint32_t*)data));
 			default:
 				return_uint8:
-				return JsUInt8Array.new_(emscripten::typed_memory_view(size / sizeof(uint8_t), data));
+				return JsUInt8Array.new_(emscripten::typed_memory_view(size / sizeof(uint8_t), (uint8_t*)data));
 		}
 	}
 	else

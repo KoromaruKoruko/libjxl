@@ -8,7 +8,6 @@
 #include "wasm_extras_internals.h"
 
 #pragma region enums
-
 #define DefineEnumString(name) std::make_pair(name, #name)
 const std::map<JxlDecoderStatus, const char*> JXLDecoderStatusStrings
 {

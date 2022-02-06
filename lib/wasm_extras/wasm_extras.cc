@@ -223,53 +223,10 @@ void post_load()
     );
 }
 
-#pragma region WasmBuilder
-#define Struct(type, code) \
-    struct type \
-    {   \
-        code \
-    };
-#define Member(valuetype, member) \
-    valuetype member; \
-    valuetype get##member() const {return member;} \
-    void set##member(valuetype value) {member=value;}
-#define Public() public:
-
-Struct(WasmJxlPreviewHeader,
-    Public()
-    Member(uint32_t, xsize)
-    Member(uint32_t, ysize)
-)
-
-
-#undef Struct
-#undef Member
-#undef Public
-
-#pragma endregion
-
 // should handle loading the module, actual functions shall be exposed via {enc/dec}_extras.cc
 EMSCRIPTEN_BINDINGS(wasm_extras) {
     emscripten_run_script("console.log('wasm_extras')");
     emscripten::function("onRuntimeInitialized", post_load);
-
-
-    #define Struct(type, code) \
-        { \
-            using def_type = type; \
-            auto def = emscripten::class_<type>(#type); \
-            code \
-        }
-    #define __Member2(valuetype, member, getter, setter) def.property(#member, &getter, &setter);
-    #define Member(valuetype, member) __Member2(valuetype, member, def_type::get##member, def_type::set##member)
-    #define Public()
-
-    Struct(WasmJxlPreviewHeader,
-        Public()
-        Member(uint32_t, xsize)
-        Member(uint32_t, ysize)
-    )
-
 
 
 	#define DefineEnum(enum, name) enum##_enum.value(#name, enum::name)
